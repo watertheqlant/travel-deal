@@ -1,0 +1,138 @@
+[
+  {
+    "id": "agoda-2026",
+    "brand": "Agoda",
+    "logoColor": "bg-emerald-600",
+    "title": "아고다 전세계 호텔 7% 추가 할인 코드",
+    "discount": "7% OFF",
+    "category": "숙박",
+    "code": "AGODATRAVEL26",
+    "link": "https://www.agoda.com",
+    "validUntil": "2026-12-31",
+    "terms": [
+      "아고다 웹 및 앱에서 예약 시 적용 가능",
+      "일부 프로모션 상품 제외",
+      "현지 결제 상품이 아닌 '지금 결제' 상품에만 적용 가능"
+    ],
+    "featured": true
+  },
+  {
+    "id": "booking-cashback",
+    "brand": "Booking.com",
+    "logoColor": "bg-blue-600",
+    "title": "부킹닷컴 숙박 최대 10% 캐시백 & 특가",
+    "discount": "최대 10% 캐시백",
+    "category": "숙박",
+    "code": "BOOKING10TRIP",
+    "link": "https://www.booking.com",
+    "validUntil": "2026-10-15",
+    "terms": [
+      "제휴 페이지를 통해 예약 및 투숙 완료 시 캐시백 지급",
+      "지니어스(Genius) 등급 할인과 중복 적용 가능",
+      "투숙 완료 후 최대 64일 이내 캐시백 지급"
+    ],
+    "featured": true
+  },
+  {
+    "id": "klook-activity",
+    "brand": "Klook",
+    "logoColor": "bg-orange-500",
+    "title": "클룩 전세계 투어/티켓 신규 회원 5% 할인",
+    "discount": "5% OFF",
+    "category": "액티비티",
+    "code": "KLOOKNEW26",
+    "link": "https://www.klook.com",
+    "validUntil": "2026-12-31",
+    "terms": [
+      "클룩 첫 구매 회원만 사용 가능",
+      "최대 15,000원까지 할인 적용",
+      "일부 패스(JR패스, 디즈니랜드 등) 제외"
+    ],
+    "featured": true
+  },
+  {
+    "id": "myrealtrip-stay",
+    "brand": "마이리얼트립",
+    "logoColor": "bg-sky-500",
+    "title": "마이리얼트립 국내외 숙소 10만원 이상 결제 시 5,000원 쿠폰",
+    "discount": "5,000원 할인",
+    "category": "숙박",
+    "code": "MRTSUMMER5",
+    "link": "https://www.myrealtrip.com",
+    "validUntil": "2026-08-31",
+    "terms": [
+      "10만원 이상 결제 시 사용 가능",
+      "쿠폰 다운로드 후 7일 이내 사용 필수",
+      "일부 단독 특가 상품 제외"
+    ],
+    "featured": false
+  },
+  {
+    "id": "kkday-global",
+    "brand": "KKday",
+    "logoColor": "bg-cyan-400",
+    "title": "KKday 인기 액티비티 및 유심/와이파이 8% 즉시 할인",
+    "discount": "8% OFF",
+    "category": "액티비티",
+    "code": "KKDAYTRIP8",
+    "link": "https://www.kkday.com",
+    "validUntil": "2026-11-30",
+    "terms": [
+      "지정된 링크를 통해 구매 시에만 할인 코드 적용 가능",
+      "최대 20,000원까지 즉시 할인",
+      "이용 기간 무관 (예약 완료 기준)"
+    ],
+    "featured": false
+  },
+  {
+    "id": "skyscanner-flight",
+    "brand": "Trip.com",
+    "logoColor": "bg-blue-800",
+    "title": "트립닷컴 전세계 항공권 최대 2% 즉시 할인",
+    "discount": "최대 2% OFF",
+    "category": "항공",
+    "code": "TRIPFLIGHT02",
+    "link": "https://www.trip.com",
+    "validUntil": "2026-09-30",
+    "terms": [
+      "항공권 편도/왕복 전 노선 대상",
+      "결제 단계에서 쿠폰 코드 입력 시 즉시 할인 적용",
+      "유류할증료 및 세금을 제외한 항공 운임에 대해서만 적용"
+    ],
+    "featured": false
+  },
+  {
+    "id": "koreanair-card",
+    "brand": "대한항공",
+    "logoColor": "bg-blue-900",
+    "title": "대한항공 현대카드 결제 시 항공권 5만원 즉시 할인",
+    "discount": "50,000원 할인",
+    "category": "항공",
+    "code": "KALCARD50",
+    "link": "https://www.koreanair.com",
+    "validUntil": "2026-07-31",
+    "terms": [
+      "대한항공 홈페이지/앱에서 대한항공 현대카드 결제 시",
+      "50만원 이상 항공권 구매 고객 대상",
+      "한국 출발 국제선 전 노선 해당"
+    ],
+    "featured": true
+  },
+  {
+    "id": "rentalcar-worldwide",
+    "brand": "Rentalcars.com",
+    "logoColor": "bg-yellow-500",
+    "title": "렌탈카스닷컴 전세계 렌터카 예약 5% 할인",
+    "discount": "5% OFF",
+    "category": "교통",
+    "code": "RENTAL5OFF",
+    "link": "https://www.rentalcars.com",
+    "validUntil": "2026-12-31",
+    "terms": [
+      "지정 프로모션 페이지 예약 시 적용",
+      "현장 지불 요금 제외, 선결제 상품만 적용",
+      "모든 차량 등급에 적용 가능"
+    ],
+    "featured": false
+  }
+]
