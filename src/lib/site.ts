@@ -21,6 +21,8 @@ export const SITE_KEYWORDS = [
 export const SITE_OG_IMAGE = "/hero-banner.png";
 
 // Google Search Console verification token.
-// Set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION in the deployment env (Vercel project settings).
+// This value is NOT secret — it is exposed publicly in the page <head> by design.
+// An env override (NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION) takes precedence if set.
 export const GOOGLE_SITE_VERIFICATION =
-  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "";
+  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ??
+  "QBiyaRSDYcvm21Rps0RSLMBEOJCNQj1YL5Ot_vJ4hS8";

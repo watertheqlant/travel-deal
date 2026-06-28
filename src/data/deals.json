@@ -1,7 +1,7 @@
 [
   {
     "id": "agoda-2026",
-    "brand": "Agoda",
+    "brand": "아고다",
     "logoColor": "bg-emerald-600",
     "title": "아고다 전세계 호텔 7% 추가 할인 코드",
     "discount": "7% OFF",
@@ -18,7 +18,7 @@
   },
   {
     "id": "booking-cashback",
-    "brand": "Booking.com",
+    "brand": "부킹닷컴",
     "logoColor": "bg-blue-600",
     "title": "부킹닷컴 숙박 최대 10% 캐시백 & 특가",
     "discount": "최대 10% 캐시백",
@@ -35,7 +35,7 @@
   },
   {
     "id": "klook-activity",
-    "brand": "Klook",
+    "brand": "클룩",
     "logoColor": "bg-orange-500",
     "title": "클룩 전세계 투어/티켓 신규 회원 5% 할인",
     "discount": "5% OFF",
@@ -86,7 +86,7 @@
   },
   {
     "id": "skyscanner-flight",
-    "brand": "Trip.com",
+    "brand": "트립닷컴",
     "logoColor": "bg-blue-800",
     "title": "트립닷컴 전세계 항공권 최대 2% 즉시 할인",
     "discount": "최대 2% OFF",
@@ -120,7 +120,7 @@
   },
   {
     "id": "rentalcar-worldwide",
-    "brand": "Rentalcars.com",
+    "brand": "렌탈카스닷컴",
     "logoColor": "bg-yellow-500",
     "title": "렌탈카스닷컴 전세계 렌터카 예약 5% 할인",
     "discount": "5% OFF",
