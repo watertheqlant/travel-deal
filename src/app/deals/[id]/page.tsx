@@ -1,106 +1,134 @@
-"use client";
-
-import React, { use, useEffect, useState } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DealCard from "@/components/DealCard";
-import { mockDeals, Deal } from "@/data/deals";
-import { 
-  ArrowLeft, 
-  Bookmark, 
-  BookmarkCheck, 
-  Copy, 
-  Check, 
-  ExternalLink, 
-  Calendar, 
-  Info, 
-  CheckCircle2, 
+import CopyCodeButton from "@/components/CopyCodeButton";
+import BookmarkButton from "@/components/BookmarkButton";
+import { mockDeals } from "@/data/deals";
+import { SITE_URL, SITE_NAME, SITE_OG_IMAGE } from "@/lib/site";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Calendar,
+  Info,
+  CheckCircle2,
   AlertCircle,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function DealDetailPage({ params }: PageProps) {
-  const resolvedParams = use(params);
-  const { id } = resolvedParams;
+// Only the 8 known deals are valid routes; anything else 404s.
+export const dynamicParams = false;
 
+export function generateStaticParams() {
+  return mockDeals.map((deal) => ({ id: deal.id }));
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { id } = await params;
   const deal = mockDeals.find((d) => d.id === id);
 
-  const [copied, setCopied] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-
-  // Sync bookmark state on mount
-  useEffect(() => {
-    if (!deal) return;
-    const saved = localStorage.getItem("travel-deal-bookmarks");
-    if (saved) {
-      try {
-        const list = JSON.parse(saved) as string[];
-        setIsBookmarked(list.includes(deal.id));
-      } catch {
-        setIsBookmarked(false);
-      }
-    }
-  }, [deal]);
-
   if (!deal) {
-    return notFound();
+    return {};
   }
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(deal.code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
+  const title = `${deal.brand} 할인코드 ${deal.discount}`;
+  const description = `${deal.brand} ${deal.title}. 할인코드 ${deal.code} 입력 시 ${deal.discount} 혜택, ${deal.validUntil}까지 사용 가능. 복사하고 바로 적용하세요.`;
+  const url = `/deals/${deal.id}`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      `${deal.brand} 할인코드`,
+      `${deal.brand} 쿠폰`,
+      `${deal.brand} 프로모션 코드`,
+      `${deal.category} 할인`,
+      "여행 할인",
+      "트래블딜",
+    ],
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      type: "article",
+      locale: "ko_KR",
+      url,
+      siteName: SITE_NAME,
+      title: `${deal.brand} 할인코드 ${deal.discount} | 트래블딜`,
+      description,
+      images: [SITE_OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${deal.brand} 할인코드 ${deal.discount} | 트래블딜`,
+      description,
+      images: [SITE_OG_IMAGE],
+    },
+  };
+}
+
+const categoryColors = {
+  숙박: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20",
+  항공: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20",
+  액티비티:
+    "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20",
+  교통: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+};
+
+export default async function DealDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  const deal = mockDeals.find((d) => d.id === id);
+
+  if (!deal) {
+    notFound();
+  }
+
+  const dealUrl = `${SITE_URL}/deals/${deal.id}`;
+
+  const offerJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Offer",
+    name: deal.title,
+    description: `${deal.brand} ${deal.discount} 할인코드 (${deal.code})`,
+    category: deal.category,
+    url: dealUrl,
+    priceCurrency: "KRW",
+    seller: {
+      "@type": "Organization",
+      name: deal.brand,
+    },
+    validThrough: deal.validUntil,
   };
 
-  const handleBookmark = () => {
-    const saved = localStorage.getItem("travel-deal-bookmarks");
-    let list: string[] = [];
-
-    if (saved) {
-      try {
-        list = JSON.parse(saved);
-        if (!Array.isArray(list)) list = [];
-      } catch {
-        list = [];
-      }
-    }
-
-    if (list.includes(deal.id)) {
-      list = list.filter((savedId) => savedId !== deal.id);
-      setIsBookmarked(false);
-    } else {
-      list.push(deal.id);
-      setIsBookmarked(true);
-    }
-
-    localStorage.setItem("travel-deal-bookmarks", JSON.stringify(list));
-    window.dispatchEvent(new Event("bookmark-updated"));
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "홈", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: deal.title, item: dealUrl },
+    ],
   };
 
   // Filter other active deals
-  const relatedDeals = mockDeals
-    .filter((d) => d.id !== deal.id)
-    .slice(0, 3);
-
-  const categoryColors = {
-    숙박: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20",
-    항공: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20",
-    액티비티: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20",
-    교통: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
-  };
+  const relatedDeals = mockDeals.filter((d) => d.id !== deal.id).slice(0, 3);
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([offerJsonLd, breadcrumbJsonLd]),
+        }}
+      />
+
       <Navbar />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-up">
@@ -131,22 +159,7 @@ export default function DealDetailPage({ params }: PageProps) {
                   </span>
                 </div>
 
-                <button
-                  onClick={handleBookmark}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors text-slate-600 dark:text-slate-300"
-                >
-                  {isBookmarked ? (
-                    <>
-                      <BookmarkCheck className="w-4.5 h-4.5 text-brand-primary fill-brand-primary" />
-                      <span>저장됨</span>
-                    </>
-                  ) : (
-                    <>
-                      <Bookmark className="w-4.5 h-4.5" />
-                      <span>저장하기</span>
-                    </>
-                  )}
-                </button>
+                <BookmarkButton dealId={deal.id} />
               </div>
 
               {/* Title & Discount */}
@@ -154,7 +167,7 @@ export default function DealDetailPage({ params }: PageProps) {
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">
                   {deal.title}
                 </h1>
-                
+
                 <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500 text-sm">
                   <Calendar className="w-4 h-4" />
                   <span>만료일: <strong className="text-slate-600 dark:text-slate-300">{deal.validUntil}</strong>까지 사용 가능</span>
@@ -176,26 +189,7 @@ export default function DealDetailPage({ params }: PageProps) {
                   <code className="text-base sm:text-lg font-mono font-black tracking-widest text-slate-700 dark:text-slate-300 pl-3">
                     {deal.code}
                   </code>
-                  <button
-                    onClick={handleCopy}
-                    className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl transition-all ${
-                      copied
-                        ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/10"
-                        : "bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-brand-primary hover:text-white dark:hover:text-white"
-                    }`}
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-3.5 h-3.5" />
-                        <span>복사 완료</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>코드 복사</span>
-                      </>
-                    )}
-                  </button>
+                  <CopyCodeButton code={deal.code} />
                 </div>
 
                 {/* Redirect Link */}
@@ -213,11 +207,11 @@ export default function DealDetailPage({ params }: PageProps) {
 
             {/* How to use */}
             <div className="glass rounded-3xl p-6 sm:p-8 border border-slate-200/20 dark:border-slate-800/20">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
                 <Info className="w-5 h-5 text-brand-secondary" />
                 <span>쿠폰 사용 방법 안내 ✈️</span>
-              </h3>
-              
+              </h2>
+
               <div className="relative border-l border-slate-200 dark:border-slate-800 ml-3 pl-6 space-y-6">
                 {[
                   { step: "01", text: "코드 복사 버튼을 눌러 할인코드를 복사합니다." },
@@ -242,11 +236,11 @@ export default function DealDetailPage({ params }: PageProps) {
           {/* Right Column: Terms & Conditions & Warning */}
           <div className="space-y-6">
             <div className="glass rounded-3xl p-6 border border-slate-200/20 dark:border-slate-800/20">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                 <span>쿠폰 이용 조건 📋</span>
-              </h3>
-              
+              </h2>
+
               <ul className="space-y-3">
                 {deal.terms.map((term, index) => (
                   <li key={index} className="flex gap-2 text-sm text-slate-600 dark:text-slate-400">
@@ -258,10 +252,10 @@ export default function DealDetailPage({ params }: PageProps) {
             </div>
 
             <div className="bg-amber-500/5 border border-amber-500/20 rounded-3xl p-6 space-y-3">
-              <h4 className="text-sm font-bold text-amber-600 dark:text-amber-500 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-amber-600 dark:text-amber-500 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
                 <span>유의사항 안내</span>
-              </h4>
+              </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 본 할인 정보는 수시로 변경될 수 있으며, 마감 임박 또는 조건 변경에 따라 코드 적용이 되지 않을 수 있습니다. 예약 완료 전에 반드시 할인 금액이 최종 적용되었는지 직접 확인해 주시기 바랍니다.
               </p>
@@ -280,7 +274,7 @@ export default function DealDetailPage({ params }: PageProps) {
                 다른 추천 할인 정보 🔥
               </h2>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedDeals.map((relatedDeal) => (
                 <DealCard key={relatedDeal.id} deal={relatedDeal} />

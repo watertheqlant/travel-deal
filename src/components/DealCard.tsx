@@ -15,15 +15,29 @@ export default function DealCard({ deal }: DealCardProps) {
 
   // Check if bookmarked on mount/change
   useEffect(() => {
-    const saved = localStorage.getItem("travel-deal-bookmarks");
-    if (saved) {
-      try {
-        const list = JSON.parse(saved) as string[];
-        setIsBookmarked(list.includes(deal.id));
-      } catch {
+    const syncBookmark = () => {
+      const saved = localStorage.getItem("travel-deal-bookmarks");
+      if (saved) {
+        try {
+          const list = JSON.parse(saved) as string[];
+          setIsBookmarked(list.includes(deal.id));
+        } catch {
+          setIsBookmarked(false);
+        }
+      } else {
         setIsBookmarked(false);
       }
-    }
+    };
+
+    syncBookmark();
+
+    // Keep cards in sync when bookmarks change elsewhere (detail page, other tabs)
+    window.addEventListener("bookmark-updated", syncBookmark);
+    window.addEventListener("storage", syncBookmark);
+    return () => {
+      window.removeEventListener("bookmark-updated", syncBookmark);
+      window.removeEventListener("storage", syncBookmark);
+    };
   }, [deal.id]);
 
   const handleCopy = async (e: React.MouseEvent) => {

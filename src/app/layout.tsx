@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import { Outfit, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
+import {
+  SITE_URL,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_OG_IMAGE,
+  GOOGLE_SITE_VERIFICATION,
+} from "@/lib/site";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -14,9 +23,70 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "트래블딜 (Travel Deal) | 실시간 여행 할인 & 쿠폰 혜택",
-  description: "아고다, 부킹닷컴, Klook, 마이리얼트립 등 인기 여행 플랫폼의 실시간 할인 쿠폰 번호와 특가 혜택 정보를 한눈에 모아보세요. 복사만 하면 바로 할인이 적용됩니다!",
-  keywords: ["여행쿠폰", "여행할인", "아고다할인코드", "Klook할인쿠폰", "특가항공권", "호텔할인코드", "트래블딜"],
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: "%s | 트래블딜",
+  },
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  applicationName: SITE_NAME,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: SITE_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: "트래블딜 - 실시간 여행 할인 쿠폰",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [SITE_OG_IMAGE],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  ...(GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: GOOGLE_SITE_VERIFICATION } }
+    : {}),
+};
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: SITE_NAME,
+  url: SITE_URL,
+  logo: `${SITE_URL}/icon`,
+  description: SITE_DESCRIPTION,
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  url: SITE_URL,
+  inLanguage: "ko-KR",
 };
 
 export default function RootLayout({
@@ -30,6 +100,12 @@ export default function RootLayout({
       className={`${outfit.variable} ${notoSansKR.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans text-slate-800 bg-[#f8fafc]">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([organizationJsonLd, websiteJsonLd]),
+          }}
+        />
         {children}
       </body>
     </html>

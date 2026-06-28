@@ -1,12 +1,10 @@
-"use client";
-
 import React from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DealCard from "@/components/DealCard";
 import { mockDeals } from "@/data/deals";
-import { Sparkles, TicketPercent, Compass } from "lucide-react";
+import { Sparkles, TicketPercent } from "lucide-react";
 
 export default function Home() {
   const featuredDeals = mockDeals.filter((deal) => deal.featured);
