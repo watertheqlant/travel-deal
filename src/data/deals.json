@@ -17,6 +17,23 @@
     "featured": true
   },
   {
+    "id": "agoda-2026",
+    "brand": "아고다",
+    "logoColor": "bg-emerald-600",
+    "title": "아고다 로마 호텔 예약 할인 링크",
+    "discount": "4~7% OFF",
+    "category": "숙박",
+    "code": "AGODATRAVEL26",
+    "link": "https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=-1",
+    "validUntil": "2026-12-31",
+    "terms": [
+      "아고다 웹 및 앱에서 예약 시 적용 가능",
+      "해당 링크로 접근시 할인가 4 ~ 7% 적용",
+      "일부 프로모션 상품 제외"
+    ],
+    "featured": true
+  },
+  {
     "id": "booking-cashback",
     "brand": "부킹닷컴",
     "logoColor": "bg-blue-600",
