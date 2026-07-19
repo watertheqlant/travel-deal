@@ -3,7 +3,7 @@
 export const SITE_URL = "https://travel-deal-4u.vercel.app";
 export const SITE_NAME = "곰곰쿠폰";
 export const SITE_TITLE =
-  "곰곰곰쿠폰 (Gomgomcoupon) | 실시간 여행 할인 & 쿠폰 혜택";
+  "곰곰쿠폰 (Gomgomcoupon) | 실시간 여행 할인 & 쿠폰 혜택";
 export const SITE_DESCRIPTION =
   "아고다, 부킹닷컴, Klook, 마이리얼트립 등 인기 여행 플랫폼의 실시간 할인 쿠폰 번호와 특가 혜택 정보를 한눈에 모아보세요. 복사만 하면 바로 할인이 적용됩니다!";
 
