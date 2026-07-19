@@ -47,7 +47,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-2 group ">
             <Compass className="w-6 h-6 sm:w-6 sm:h-6 animate-spin-slow" />
             <span className="text-xl sm:text-2xl font-black tracking-tight">
-              곰쿠폰
+              곰곰쿠폰
             </span>
           </Link>
 

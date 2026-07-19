@@ -12,7 +12,7 @@ import { Sparkles, TicketPercent } from "lucide-react";
 const itemListJsonLd = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: "곰쿠폰 실시간 여행 할인 쿠폰 목록",
+  name: "곰곰쿠폰 실시간 여행 할인 쿠폰 목록",
   numberOfItems: mockDeals.length,
   itemListElement: mockDeals.map((deal, index) => ({
     "@type": "ListItem",
@@ -30,7 +30,7 @@ const homeFaqJsonLd = {
   mainEntity: [
     {
       "@type": "Question",
-      name: "곰쿠폰의 할인 쿠폰은 어떻게 사용하나요?",
+      name: "곰곰쿠폰의 할인 쿠폰은 어떻게 사용하나요?",
       acceptedAnswer: {
         "@type": "Answer",
         text: "원하는 딜을 선택해 할인코드를 복사한 뒤, 해당 예약 플랫폼의 결제 화면에 있는 '프로모션 코드' 입력란에 붙여넣고 적용하면 할인이 반영됩니다. 결제 전 총액이 실제로 낮아졌는지 확인하세요.",
@@ -41,7 +41,7 @@ const homeFaqJsonLd = {
       name: "할인 쿠폰 이용에 비용이 드나요?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "아니요. 곰쿠폰의 모든 할인코드와 쿠폰 정보는 무료로 제공됩니다. 회원가입 없이 코드를 복사해 바로 사용할 수 있습니다.",
+        text: "아니요. 곰곰쿠폰의 모든 할인코드와 쿠폰 정보는 무료로 제공됩니다. 회원가입 없이 코드를 복사해 바로 사용할 수 있습니다.",
       },
     },
     {
@@ -103,7 +103,7 @@ export default function Home() {
             
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-slate-900">
               여행을 가볍게,<br className="sm:hidden" />
-              할인은 <span className="text-brand-primary">곰쿠폰</span>에서!
+              할인은 <span className="text-brand-primary">곰곰쿠폰</span>에서!
             </h1>
             
             <p className="text-sm sm:text-lg text-slate-600 max-w-xl mx-auto font-medium">
@@ -126,7 +126,7 @@ export default function Home() {
                     오늘의 추천 특가 🌟
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                    곰쿠폰이 엄선한 놓치기 아까운 강력 추천 할인 혜택
+                    곰곰쿠폰이 엄선한 놓치기 아까운 강력 추천 할인 혜택
                   </p>
                 </div>
               </div>
