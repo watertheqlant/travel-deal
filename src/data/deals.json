@@ -17,14 +17,14 @@
     "featured": true
   },
   {
-    "id": "agoda-2026",
+    "id": "agoda-2026-rome",
     "brand": "아고다",
     "logoColor": "bg-emerald-600",
     "title": "아고다 로마 호텔 예약 할인 링크",
     "discount": "4~7% OFF",
     "category": "숙박",
     "code": "AGODATRAVEL26",
-    "link": "https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=-1",
+    "link": "https://www.agoda.com/ko-kr/search?pcs=1&cid=-1&hl=ko-kr&city=16594&checkIn=2026-11-14&checkOut=2026-11-15&adults=2&rooms=1&pslc=1&ds=OAWUtbfEN3Z6RdJAhttps://www.agoda.com/ko-kr/search?pcs=1&cid=-1&hl=ko-kr&city=16594&checkIn=2026-11-14&checkOut=2026-11-15&adults=2&rooms=1&pslc=1&ds=OAWUtbfEN3Z6RdJA",
     "validUntil": "2026-12-31",
     "terms": [
       "아고다 웹 및 앱에서 예약 시 적용 가능",
