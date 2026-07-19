@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Noto_Sans_KR } from "next/font/google";
+import { Outfit, Noto_Sans_KR, Jua, Gothic_A1 } from "next/font/google";
 import "./globals.css";
 import {
   SITE_URL,
@@ -22,6 +22,20 @@ const notoSansKR = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
   subsets: ["latin"],
   weight: ["300", "400", "500", "700", "900"],
+});
+
+// Display font for the 곰곰쿠폰 hero banner (rounded, playful Korean face).
+const jua = Jua({
+  variable: "--font-jua",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+// Body font used inside the hero banner.
+const gothicA1 = Gothic_A1({
+  variable: "--font-gothic-a1",
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -113,7 +127,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${outfit.variable} ${notoSansKR.variable} h-full antialiased`}
+      className={`${outfit.variable} ${notoSansKR.variable} ${jua.variable} ${gothicA1.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans text-slate-800 bg-[#f8fafc]">
         <script
