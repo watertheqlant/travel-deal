@@ -9,6 +9,8 @@ import {
   SITE_KEYWORDS,
   SITE_OG_IMAGE,
   GOOGLE_SITE_VERIFICATION,
+  NAVER_SITE_VERIFICATION,
+  BING_SITE_VERIFICATION,
 } from "@/lib/site";
 
 const outfit = Outfit({
@@ -67,9 +69,23 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-  ...(GOOGLE_SITE_VERIFICATION
-    ? { verification: { google: GOOGLE_SITE_VERIFICATION } }
-    : {}),
+  verification: {
+    ...(GOOGLE_SITE_VERIFICATION ? { google: GOOGLE_SITE_VERIFICATION } : {}),
+    // `other` keys are emitted verbatim as <meta name="<key>" content="<value>">.
+    // naver-site-verification → Naver Search Advisor; msvalidate.01 → Bing Webmaster.
+    ...((NAVER_SITE_VERIFICATION || BING_SITE_VERIFICATION)
+      ? {
+          other: {
+            ...(NAVER_SITE_VERIFICATION
+              ? { "naver-site-verification": NAVER_SITE_VERIFICATION }
+              : {}),
+            ...(BING_SITE_VERIFICATION
+              ? { "msvalidate.01": BING_SITE_VERIFICATION }
+              : {}),
+          },
+        }
+      : {}),
+  },
 };
 
 const organizationJsonLd = {

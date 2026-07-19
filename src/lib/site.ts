@@ -20,9 +20,19 @@ export const SITE_KEYWORDS = [
 // Open Graph / Twitter share image (lives in /public). Resolved against metadataBase.
 export const SITE_OG_IMAGE = "/hero-banner.png";
 
-// Google Search Console verification token.
-// This value is NOT secret — it is exposed publicly in the page <head> by design.
-// An env override (NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION) takes precedence if set.
+// Search engine ownership-verification tokens.
+// These values are NOT secret — they are exposed publicly in the page <head> by design.
+// Each has a NEXT_PUBLIC_* env override that takes precedence if set.
 export const GOOGLE_SITE_VERIFICATION =
   process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ??
   "QBiyaRSDYcvm21Rps0RSLMBEOJCNQj1YL5Ot_vJ4hS8";
+
+// Naver Search Advisor (searchadvisor.naver.com) — Korea's dominant search engine.
+// Paste the token from "사이트 소유확인 > HTML 태그" here, or set NEXT_PUBLIC_NAVER_SITE_VERIFICATION.
+export const NAVER_SITE_VERIFICATION =
+  process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION ?? "";
+
+// Bing Webmaster Tools (bing.com/webmasters) — also powers DuckDuckGo, Ecosia, etc.
+// Paste the "content" value of the msvalidate.01 meta tag here, or set NEXT_PUBLIC_BING_SITE_VERIFICATION.
+export const BING_SITE_VERIFICATION =
+  process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION ?? "";

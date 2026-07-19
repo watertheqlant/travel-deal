@@ -4,7 +4,64 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DealCard from "@/components/DealCard";
 import { mockDeals } from "@/data/deals";
+import { SITE_URL } from "@/lib/site";
 import { Sparkles, TicketPercent } from "lucide-react";
+
+// ItemList of all live deals — helps search engines understand the homepage
+// as a curated collection and can surface a richer sitelinks presentation.
+const itemListJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "트래블딜 실시간 여행 할인 쿠폰 목록",
+  numberOfItems: mockDeals.length,
+  itemListElement: mockDeals.map((deal, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: `${deal.brand} ${deal.title}`,
+    url: `${SITE_URL}/deals/${deal.id}`,
+  })),
+};
+
+// General homepage FAQ — targets common informational queries about how
+// travel coupon codes work, and is eligible for FAQ rich results.
+const homeFaqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "트래블딜의 할인 쿠폰은 어떻게 사용하나요?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "원하는 딜을 선택해 할인코드를 복사한 뒤, 해당 예약 플랫폼의 결제 화면에 있는 '프로모션 코드' 입력란에 붙여넣고 적용하면 할인이 반영됩니다. 결제 전 총액이 실제로 낮아졌는지 확인하세요.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "할인 쿠폰 이용에 비용이 드나요?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "아니요. 트래블딜의 모든 할인코드와 쿠폰 정보는 무료로 제공됩니다. 회원가입 없이 코드를 복사해 바로 사용할 수 있습니다.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "어떤 여행 플랫폼의 할인을 제공하나요?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "아고다, 부킹닷컴, 클룩, 마이리얼트립, KKday, 트립닷컴, 대한항공, 렌탈카스닷컴 등 국내외 인기 숙박·항공·액티비티·교통 플랫폼의 할인 혜택을 한곳에 모아 제공합니다.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "할인코드가 적용되지 않을 때는 어떻게 하나요?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "쿠폰마다 최소 결제 금액, 대상 상품, 유효기간 등 조건이 다릅니다. 각 딜 상세 페이지의 이용 조건을 확인하고, 조건에 맞는 상품·결제 방식을 선택하면 대부분 해결됩니다.",
+      },
+    },
+  ],
+};
 
 export default function Home() {
   const featuredDeals = mockDeals.filter((deal) => deal.featured);
@@ -12,6 +69,13 @@ export default function Home() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([itemListJsonLd, homeFaqJsonLd]),
+        }}
+      />
+
       <Navbar />
 
       <main className="flex-1 pb-16">

@@ -10,6 +10,12 @@ export interface Deal {
   validUntil: string;
   terms: string[];
   featured?: boolean;
+  // Unique, human-written body copy for the deal detail page (SEO depth).
+  // Each string is rendered as its own paragraph.
+  about?: string[];
+  // Frequently asked questions — rendered on the page AND emitted as FAQPage
+  // structured data for rich results.
+  faq?: { q: string; a: string }[];
 }
 
 import dealsData from "./deals.json";

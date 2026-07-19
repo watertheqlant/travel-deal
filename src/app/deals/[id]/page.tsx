@@ -101,11 +101,13 @@ export default async function DealDetailPage({ params }: PageProps) {
     category: deal.category,
     url: dealUrl,
     priceCurrency: "KRW",
+    availability: "https://schema.org/InStock",
     seller: {
       "@type": "Organization",
       name: deal.brand,
     },
     validThrough: deal.validUntil,
+    priceValidUntil: deal.validUntil,
   };
 
   const breadcrumbJsonLd = {
@@ -117,6 +119,28 @@ export default async function DealDetailPage({ params }: PageProps) {
     ],
   };
 
+  // FAQPage structured data — eligible for FAQ rich results when the deal
+  // carries hand-written Q&A. Omitted entirely for deals without FAQ.
+  const faqJsonLd =
+    deal.faq && deal.faq.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: deal.faq.map((item) => ({
+            "@type": "Question",
+            name: item.q,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: item.a,
+            },
+          })),
+        }
+      : null;
+
+  const structuredData = [offerJsonLd, breadcrumbJsonLd, faqJsonLd].filter(
+    Boolean,
+  );
+
   // Filter other active deals
   const relatedDeals = mockDeals.filter((d) => d.id !== deal.id).slice(0, 3);
 
@@ -125,7 +149,7 @@ export default async function DealDetailPage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([offerJsonLd, breadcrumbJsonLd]),
+          __html: JSON.stringify(structuredData),
         }}
       />
 
@@ -231,6 +255,48 @@ export default async function DealDetailPage({ params }: PageProps) {
                 ))}
               </div>
             </div>
+
+            {/* Deal Introduction (unique SEO body copy) */}
+            {deal.about && deal.about.length > 0 && (
+              <div className="glass rounded-3xl p-6 sm:p-8 border border-slate-200/20 dark:border-slate-800/20">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-brand-primary" />
+                  <span>{deal.brand} 할인 혜택 자세히 보기</span>
+                </h2>
+                <div className="space-y-4">
+                  {deal.about.map((paragraph, idx) => (
+                    <p
+                      key={idx}
+                      className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed"
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* FAQ (rendered + FAQPage structured data) */}
+            {deal.faq && deal.faq.length > 0 && (
+              <div className="glass rounded-3xl p-6 sm:p-8 border border-slate-200/20 dark:border-slate-800/20">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                  <Info className="w-5 h-5 text-brand-secondary" />
+                  <span>자주 묻는 질문 (FAQ)</span>
+                </h2>
+                <div className="space-y-5">
+                  {deal.faq.map((item, idx) => (
+                    <div key={idx} className="space-y-1.5">
+                      <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200">
+                        Q. {item.q}
+                      </h3>
+                      <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+                        {item.a}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Terms & Conditions & Warning */}
