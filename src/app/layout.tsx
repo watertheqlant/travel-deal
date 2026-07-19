@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: SITE_TITLE,
-    template: "%s | 트래블딜",
+    template: "%s | 곰쿠폰",
   },
   description: SITE_DESCRIPTION,
   keywords: SITE_KEYWORDS,
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
         url: SITE_OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: "트래블딜 - 실시간 여행 할인 쿠폰",
+        alt: "곰쿠폰 - 실시간 여행 할인 쿠폰",
       },
     ],
   },
