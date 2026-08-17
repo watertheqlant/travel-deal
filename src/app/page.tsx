@@ -3,18 +3,35 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DealCard from "@/components/DealCard";
 import GomgomBanner from "@/components/GomgomBanner";
-import { mockDeals } from "@/data/deals";
+import {
+  mockDeals,
+  isPriorityBrand,
+  sortByBrandPriority,
+} from "@/data/deals";
 import { SITE_URL } from "@/lib/site";
 import { Sparkles, TicketPercent } from "lucide-react";
 
+// Priority brands are promoted into the featured section even when their own
+// `featured` flag is false, then sorted to the front of it.
+const featuredDeals = sortByBrandPriority(
+  mockDeals.filter((deal) => deal.featured || isPriorityBrand(deal.brand)),
+);
+const regularDeals = mockDeals.filter(
+  (deal) => !deal.featured && !isPriorityBrand(deal.brand),
+);
+
 // ItemList of all live deals — helps search engines understand the homepage
 // as a curated collection and can surface a richer sitelinks presentation.
+// Ordered to match what the page actually renders, so the structured data does
+// not contradict the visible sequence.
+const orderedDeals = [...featuredDeals, ...regularDeals];
+
 const itemListJsonLd = {
   "@context": "https://schema.org",
   "@type": "ItemList",
   name: "곰곰쿠폰 실시간 여행 할인 쿠폰 목록",
-  numberOfItems: mockDeals.length,
-  itemListElement: mockDeals.map((deal, index) => ({
+  numberOfItems: orderedDeals.length,
+  itemListElement: orderedDeals.map((deal, index) => ({
     "@type": "ListItem",
     position: index + 1,
     name: `${deal.brand} ${deal.title}`,
@@ -64,9 +81,6 @@ const homeFaqJsonLd = {
 };
 
 export default function Home() {
-  const featuredDeals = mockDeals.filter((deal) => deal.featured);
-  const regularDeals = mockDeals.filter((deal) => !deal.featured);
-
   return (
     <>
       <script
