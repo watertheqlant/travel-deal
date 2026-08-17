@@ -3,14 +3,14 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Deal } from "@/data/deals";
-import { Copy, Check, Bookmark, BookmarkCheck, ExternalLink, Calendar } from "lucide-react";
+import CopyAndGoButton from "@/components/CopyAndGoButton";
+import { Bookmark, BookmarkCheck, ExternalLink, Calendar } from "lucide-react";
 
 interface DealCardProps {
   deal: Deal;
 }
 
 export default function DealCard({ deal }: DealCardProps) {
-  const [copied, setCopied] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   // Check if bookmarked on mount/change
@@ -39,18 +39,6 @@ export default function DealCard({ deal }: DealCardProps) {
       window.removeEventListener("storage", syncBookmark);
     };
   }, [deal.id]);
-
-  const handleCopy = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigating to detail page when copying
-    e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(deal.code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
-  };
 
   const handleBookmark = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigating to detail page when bookmarking
@@ -137,31 +125,17 @@ export default function DealCard({ deal }: DealCardProps) {
             <span>기한: {deal.validUntil}까지</span>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900/60 p-2 rounded-xl border border-slate-200/10 justify-between">
-            <code className="text-sm font-mono font-bold tracking-wider text-slate-700 dark:text-slate-300 pl-2">
+          <div className="flex items-center justify-center bg-slate-100 dark:bg-slate-900/60 px-3 py-2 rounded-xl border border-slate-200/10">
+            <code className="text-sm font-mono font-bold tracking-wider text-slate-700 dark:text-slate-300 truncate">
               {deal.code}
             </code>
-            <button
-              onClick={handleCopy}
-              className={`flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
-                copied
-                  ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/10"
-                  : "bg-slate-200 hover:bg-brand-primary dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:text-white dark:hover:text-white"
-              }`}
-            >
-              {copied ? (
-                <>
-                  <Check className="w-3.5 h-3.5" />
-                  <span>복사됨</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>복사</span>
-                </>
-              )}
-            </button>
           </div>
+
+          <CopyAndGoButton
+            code={deal.code}
+            link={deal.link}
+            brand={deal.brand}
+          />
 
           {/* Details CTA Link */}
           <div className="flex items-center justify-end text-xs font-bold text-slate-400 hover:text-brand-primary gap-1 group/link mt-2">
