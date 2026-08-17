@@ -1,6 +1,16 @@
 // Central site constants used across metadata, sitemap, robots, and structured data.
 
-export const SITE_URL = "https://travel-deal-4u.vercel.app";
+// Canonical origin for the whole site. Every canonical URL, OG tag, sitemap
+// entry, robots directive, and JSON-LD `url` is derived from this one value,
+// so a domain move is a single-line change here (or an env override).
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://gomgomcp.com";
+
+// The original Vercel-assigned domain the site launched on. It still resolves,
+// so it is 308-redirected to SITE_URL in next.config.ts to consolidate ranking
+// signals and remove the duplicate-content copy. Keep this in sync with the
+// project's Vercel production domain.
+export const LEGACY_SITE_HOST = "travel-deal-4u.vercel.app";
 export const SITE_NAME = "곰곰쿠폰";
 export const SITE_TITLE =
   "곰곰쿠폰 (Gomgomcoupon) | 실시간 여행 할인 & 쿠폰 혜택";
