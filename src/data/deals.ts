@@ -5,9 +5,19 @@ export interface Deal {
   title: string;
   discount: string;
   category: "숙박" | "항공" | "액티비티" | "교통";
-  code: string;
+  /**
+   * Promo code entered at checkout. `null` for link-only promotions where the
+   * discount is applied just by arriving through `link` — there is nothing to
+   * copy, so those render a plain "go to the deal" action instead.
+   */
+  code: string | null;
   link: string;
-  validUntil: string;
+  /**
+   * Last usable date, YYYY-MM-DD. `null` for open-ended promotions that end on
+   * a condition rather than a date (budget exhaustion, stock) — those never
+   * auto-expire, so their real end condition belongs in `terms`.
+   */
+  validUntil: string | null;
   terms: string[];
   featured?: boolean;
   // Unique, human-written body copy for the deal detail page (SEO depth).
@@ -21,6 +31,44 @@ export interface Deal {
 import dealsData from "./deals.json";
 
 export const mockDeals = dealsData as Deal[];
+
+/**
+ * Today's date as YYYY-MM-DD in Asia/Seoul.
+ *
+ * The audience and every `validUntil` are Korean-local, but Vercel renders in
+ * UTC — comparing against a UTC date would expire coupons up to nine hours
+ * early. `en-CA` is used because it formats as YYYY-MM-DD, which compares
+ * correctly as a plain string.
+ */
+export function getTodayKst(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+  }).format(new Date());
+}
+
+/**
+ * A coupon is usable through its `validUntil` date, so it expires the day
+ * after. Open-ended coupons (`validUntil: null`) never expire on their own —
+ * they end on a condition we cannot observe, so they stay listed until removed
+ * by hand.
+ */
+export function isExpired(deal: Deal, today: string = getTodayKst()): boolean {
+  return deal.validUntil !== null && deal.validUntil < today;
+}
+
+/** Human-readable validity for display. */
+export function formatValidity(deal: Deal): string {
+  return deal.validUntil ?? "상시 진행";
+}
+
+/**
+ * Deals still usable today. Listings use this so dead coupons never occupy
+ * prime space; the detail pages stay reachable (they are indexed URLs) and
+ * render an expired notice instead.
+ */
+export function getActiveDeals(today: string = getTodayKst()): Deal[] {
+  return mockDeals.filter((deal) => !isExpired(deal, today));
+}
 
 /**
  * Brands pinned to the front of the homepage, in this order.

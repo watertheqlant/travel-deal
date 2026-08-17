@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import DealCard from "@/components/DealCard";
-import { mockDeals, Deal } from "@/data/deals";
+import { mockDeals, isExpired, Deal } from "@/data/deals";
 import { Bookmark, Compass } from "lucide-react";
 
 const STORAGE_KEY = "travel-deal-bookmarks";
@@ -49,8 +49,10 @@ export default function BookmarksList() {
   if (bookmarkedDeals.length > 0) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* Saved deals are shown even once they lapse — the user put them here
+            deliberately, so marking them ended beats making them vanish. */}
         {bookmarkedDeals.map((deal) => (
-          <DealCard key={deal.id} deal={deal} />
+          <DealCard key={deal.id} deal={deal} expired={isExpired(deal)} />
         ))}
       </div>
     );

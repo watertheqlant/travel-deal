@@ -3,7 +3,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { brandGuides } from "@/data/guides";
-import { mockDeals } from "@/data/deals";
+import { getActiveDeals } from "@/data/deals";
 import { SITE_URL, SITE_NAME, SITE_OG_IMAGE } from "@/lib/site";
 import { ArrowRight, BookOpen } from "lucide-react";
 
@@ -41,7 +41,12 @@ export const metadata: Metadata = {
   },
 };
 
+// The per-brand deal counts below must not include lapsed coupons.
+export const revalidate = 3600;
+
 export default function GuidesIndexPage() {
+  const activeDeals = getActiveDeals();
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -83,7 +88,7 @@ export default function GuidesIndexPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {brandGuides.map((guide) => {
-            const dealCount = mockDeals.filter(
+            const dealCount = activeDeals.filter(
               (deal) => deal.brand === guide.brand,
             ).length;
 

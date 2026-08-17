@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DealCard from "@/components/DealCard";
 import { brandGuides, getGuideBySlug } from "@/data/guides";
-import { mockDeals } from "@/data/deals";
+import { getActiveDeals } from "@/data/deals";
 import { SITE_URL, SITE_NAME, SITE_OG_IMAGE } from "@/lib/site";
 import {
   ArrowLeft,
@@ -22,6 +22,10 @@ interface PageProps {
 
 // Only the hand-written guides are valid routes; anything else 404s.
 export const dynamicParams = false;
+
+// Guides list live coupons for their brand, so they need the same hourly
+// regeneration as the other deal listings to drop expired ones.
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return brandGuides.map((guide) => ({ brand: guide.slug }));
@@ -81,7 +85,9 @@ export default async function BrandGuidePage({ params }: PageProps) {
   // Deals for this brand — the transactional counterpart of this page.
   // Rendering them here completes the guide -> deal half of the internal link
   // pair (the deal page links back).
-  const brandDeals = mockDeals.filter((deal) => deal.brand === guide.brand);
+  const brandDeals = getActiveDeals().filter(
+    (deal) => deal.brand === guide.brand,
+  );
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",

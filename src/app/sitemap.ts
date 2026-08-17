@@ -1,14 +1,18 @@
 import type { MetadataRoute } from "next";
-import { mockDeals } from "@/data/deals";
+import { mockDeals, isExpired } from "@/data/deals";
 import { brandGuides } from "@/data/guides";
 import { SITE_URL } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  // Expired deals stay listed: their pages remain 200 with an end-of-promotion
+  // notice, and dropping URLs Google was just asked to index would turn them
+  // into crawl errors. They are demoted instead, since a lapsed coupon is worth
+  // far less than a live one.
   const dealRoutes: MetadataRoute.Sitemap = mockDeals.map((deal) => ({
     url: `${SITE_URL}/deals/${deal.id}`,
     lastModified: new Date(),
-    changeFrequency: "weekly",
-    priority: 0.8,
+    changeFrequency: isExpired(deal) ? "monthly" : "weekly",
+    priority: isExpired(deal) ? 0.3 : 0.8,
   }));
 
   // Guides change far less often than deals — the underlying platform mechanics

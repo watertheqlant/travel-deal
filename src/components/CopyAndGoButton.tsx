@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Copy, Check, ExternalLink, AlertCircle } from "lucide-react";
+import { Copy, Check, ExternalLink, AlertCircle, Ticket } from "lucide-react";
 
 type CopyState = "idle" | "copied" | "failed";
 
 interface CopyAndGoButtonProps {
-  code: string;
+  /** `null` for link-only deals — the button then just opens the merchant. */
+  code: string | null;
   /** Merchant URL opened in a new tab alongside the copy. */
   link: string;
   brand: string;
@@ -44,6 +45,12 @@ export default function CopyAndGoButton({
     event.preventDefault();
     event.stopPropagation();
 
+    // Link-only deal: nothing to copy, so just hand the visitor over.
+    if (code === null) {
+      window.open(link, "_blank", "noopener,noreferrer");
+      return;
+    }
+
     // Both calls must sit in the same synchronous gesture handler. Awaiting the
     // clipboard write first would close the user-activation window and get the
     // tab blocked as a popup; opening the tab first would move focus away and
@@ -67,11 +74,14 @@ export default function CopyAndGoButton({
 
   // Kept short so the longest brand name (렌탈카스닷컴) still fits a card-width
   // button on mobile without truncating.
-  const label = {
-    idle: `복사하고 ${brand} 이동`,
-    copied: "복사 완료! 새 탭 확인",
-    failed: "코드를 직접 복사해 주세요",
-  }[state];
+  const label =
+    code === null
+      ? `${brand} 할인가 보러가기`
+      : {
+          idle: `복사하고 ${brand} 이동`,
+          copied: "복사 완료! 새 탭 확인",
+          failed: "코드를 직접 복사해 주세요",
+        }[state];
 
   const tone = {
     idle: "bg-brand-primary hover:bg-brand-primary/90 text-white shadow-sm shadow-brand-primary/20",
@@ -79,13 +89,20 @@ export default function CopyAndGoButton({
     failed: "bg-amber-500 text-white shadow-sm shadow-amber-500/20",
   }[state];
 
-  const Icon = { idle: Copy, copied: Check, failed: AlertCircle }[state];
+  const Icon =
+    code === null
+      ? Ticket
+      : { idle: Copy, copied: Check, failed: AlertCircle }[state];
 
   return (
     <button
       type="button"
       onClick={handleClick}
-      aria-label={`${brand} 할인코드 ${code} 복사하고 ${brand} 사이트를 새 탭에서 열기`}
+      aria-label={
+        code === null
+          ? `${brand} 할인 페이지를 새 탭에서 열기`
+          : `${brand} 할인코드 ${code} 복사하고 ${brand} 사이트를 새 탭에서 열기`
+      }
       className={`w-full flex items-center justify-center gap-1.5 text-xs sm:text-sm font-bold px-3 py-2.5 rounded-xl transition-all cursor-pointer ${tone}`}
     >
       <Icon className="w-4 h-4 shrink-0" />

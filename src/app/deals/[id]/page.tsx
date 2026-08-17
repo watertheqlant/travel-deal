@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import DealCard from "@/components/DealCard";
 import CopyCodeButton from "@/components/CopyCodeButton";
 import BookmarkButton from "@/components/BookmarkButton";
-import { mockDeals } from "@/data/deals";
+import { mockDeals, getActiveDeals, isExpired } from "@/data/deals";
 import { getGuideByBrand } from "@/data/guides";
 import { SITE_URL, SITE_NAME, SITE_OG_IMAGE } from "@/lib/site";
 import {
@@ -25,8 +25,13 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-// Only the 8 known deals are valid routes; anything else 404s.
+// Only the known deals are valid routes; anything else 404s.
 export const dynamicParams = false;
+
+// Prerendered, so "today" would otherwise be frozen at build time and an
+// expired coupon would keep presenting itself as usable. Hourly regeneration
+// lets the expiry notice appear without a deploy.
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return mockDeals.map((deal) => ({ id: deal.id }));
@@ -43,7 +48,15 @@ export async function generateMetadata({
   }
 
   const title = `${deal.brand} 할인코드 ${deal.discount}`;
-  const description = `${deal.brand} ${deal.title}. 할인코드 ${deal.code} 입력 시 ${deal.discount} 혜택, ${deal.validUntil}까지 사용 가능. 복사하고 바로 적용하세요.`;
+  // Search results can outlive the coupon. Say so in the description rather
+  // than letting a dead offer look live in the SERP.
+  const description = isExpired(deal)
+    ? `${deal.brand} ${deal.title}은 ${deal.validUntil}자로 종료되었습니다. 지금 사용할 수 있는 ${deal.category} 할인 쿠폰을 확인하세요.`
+    : `${deal.brand} ${deal.title}. ${
+        deal.code
+          ? `할인코드 ${deal.code} 입력 시 ${deal.discount} 혜택`
+          : `코드 입력 없이 링크 접속만으로 ${deal.discount} 적용`
+      }${deal.validUntil ? `, ${deal.validUntil}까지 사용 가능` : ""}. 지금 바로 확인하세요.`;
   const url = `/deals/${deal.id}`;
 
   return {
@@ -95,12 +108,15 @@ export default async function DealDetailPage({ params }: PageProps) {
   }
 
   const dealUrl = `${SITE_URL}/deals/${deal.id}`;
+  const expired = isExpired(deal);
 
   const offerJsonLd = {
     "@context": "https://schema.org",
     "@type": "Offer",
     name: deal.title,
-    description: `${deal.brand} ${deal.discount} 할인코드 (${deal.code})`,
+    description: deal.code
+      ? `${deal.brand} ${deal.discount} 할인코드 (${deal.code})`
+      : `${deal.brand} ${deal.discount} — 코드 없이 링크 접속으로 적용`,
     category: deal.category,
     url: dealUrl,
     priceCurrency: "KRW",
@@ -109,8 +125,11 @@ export default async function DealDetailPage({ params }: PageProps) {
       "@type": "Organization",
       name: deal.brand,
     },
-    validThrough: deal.validUntil,
-    priceValidUntil: deal.validUntil,
+    // Omitted entirely for open-ended promotions — a null validThrough is
+    // invalid structured data, and inventing a date would be a false claim.
+    ...(deal.validUntil
+      ? { validThrough: deal.validUntil, priceValidUntil: deal.validUntil }
+      : {}),
   };
 
   const breadcrumbJsonLd = {
@@ -140,12 +159,26 @@ export default async function DealDetailPage({ params }: PageProps) {
         }
       : null;
 
-  const structuredData = [offerJsonLd, breadcrumbJsonLd, faqJsonLd].filter(
-    Boolean,
-  );
+  // An expired coupon must not keep advertising itself as a live Offer; the
+  // breadcrumb and FAQ stay because they describe the page, not the offer.
+  const structuredData = [
+    expired ? null : offerJsonLd,
+    breadcrumbJsonLd,
+    faqJsonLd,
+  ].filter(Boolean);
 
-  // Filter other active deals
-  const relatedDeals = mockDeals.filter((d) => d.id !== deal.id).slice(0, 3);
+  const activeDeals = getActiveDeals().filter((d) => d.id !== deal.id);
+
+  // For an expired deal, lead with usable coupons in the same category so a
+  // visitor arriving from search does not leave empty-handed.
+  const relatedDeals = (
+    expired
+      ? [
+          ...activeDeals.filter((d) => d.category === deal.category),
+          ...activeDeals.filter((d) => d.category !== deal.category),
+        ]
+      : activeDeals
+  ).slice(0, 3);
 
   // The informational counterpart of this page, when one exists. Linking to it
   // completes the deal <-> guide pair: this page owns the transactional query
@@ -175,6 +208,22 @@ export default async function DealDetailPage({ params }: PageProps) {
           </Link>
         </div>
 
+        {expired && (
+          <div className="mb-6 flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 sm:p-5">
+            <AlertCircle className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-500 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-amber-700 dark:text-amber-500">
+                종료된 프로모션입니다
+              </p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                이 혜택은 {deal.validUntil}자로 종료되어 할인코드가 적용되지
+                않습니다. 페이지 하단에서 지금 사용할 수 있는 다른 할인을
+                확인하실 수 있습니다.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
           {/* Left Column: Coupon Info Card */}
@@ -202,7 +251,19 @@ export default async function DealDetailPage({ params }: PageProps) {
 
                 <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500 text-sm">
                   <Calendar className="w-4 h-4" />
-                  <span>만료일: <strong className="text-slate-600 dark:text-slate-300">{deal.validUntil}</strong>까지 사용 가능</span>
+                  {expired ? (
+                    <span>
+                      <strong className="text-slate-600 dark:text-slate-300">{deal.validUntil}</strong>자로 종료된 프로모션입니다
+                    </span>
+                  ) : deal.validUntil ? (
+                    <span>만료일: <strong className="text-slate-600 dark:text-slate-300">{deal.validUntil}</strong>까지 사용 가능</span>
+                  ) : (
+                    // No end date exists — the promotion ends on a condition,
+                    // which is spelled out in the terms panel.
+                    <span>
+                      <strong className="text-slate-600 dark:text-slate-300">종료일 미정</strong> · 아래 이용 조건의 종료 기준을 확인하세요
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -214,27 +275,52 @@ export default async function DealDetailPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                {/* Coupon Code Section */}
-                <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-900/60 p-3 rounded-2xl border border-slate-200/10">
-                  <code className="text-base sm:text-lg font-mono font-black tracking-widest text-slate-700 dark:text-slate-300 pl-3">
-                    {deal.code}
-                  </code>
-                  <CopyCodeButton code={deal.code} />
+              {/* Action Buttons — replaced by an end-of-promotion notice once
+                  the coupon lapses, so nobody copies a code that will fail at
+                  checkout. */}
+              {expired ? (
+                <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200/40 dark:border-slate-800/40 rounded-2xl p-5 space-y-2 text-center">
+                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    이 할인코드는 더 이상 사용할 수 없습니다
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    아래에서 지금 사용할 수 있는 {deal.category} 할인을 확인하거나,{" "}
+                    <Link href="/" className="font-bold text-brand-primary hover:underline">
+                      전체 쿠폰 목록
+                    </Link>
+                    을 둘러보세요.
+                  </p>
                 </div>
+              ) : (
+                <div className={`grid grid-cols-1 gap-4 pt-2 ${deal.code ? "sm:grid-cols-2" : ""}`}>
+                  {/* Coupon Code Section — omitted for link-only promotions,
+                      where the discount comes from arriving via the link. */}
+                  {deal.code ? (
+                    <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-900/60 p-3 rounded-2xl border border-slate-200/10">
+                      <code className="text-base sm:text-lg font-mono font-black tracking-widest text-slate-700 dark:text-slate-300 pl-3">
+                        {deal.code}
+                      </code>
+                      <CopyCodeButton code={deal.code} />
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-100 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200/10">
+                      이 혜택은 <strong className="text-slate-700 dark:text-slate-300">쿠폰 코드가 없습니다.</strong>{" "}
+                      아래 버튼으로 접속하면 할인가가 자동으로 반영된 화면이 열립니다.
+                    </p>
+                  )}
 
-                {/* Redirect Link */}
-                <a
-                  href={deal.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-primary/95 text-white font-bold p-3 rounded-2xl shadow-lg shadow-brand-primary/10 transition-all hover:scale-102 cursor-pointer"
-                >
-                  <span>공식 사이트 바로가기</span>
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
+                  {/* Redirect Link */}
+                  <a
+                    href={deal.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-primary/95 text-white font-bold p-3 rounded-2xl shadow-lg shadow-brand-primary/10 transition-all hover:scale-102 cursor-pointer"
+                  >
+                    <span>공식 사이트 바로가기</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* How to use */}
@@ -245,13 +331,21 @@ export default async function DealDetailPage({ params }: PageProps) {
               </h2>
 
               <div className="relative border-l border-slate-200 dark:border-slate-800 ml-3 pl-6 space-y-6">
-                {[
-                  { step: "01", text: "코드 복사 버튼을 눌러 할인코드를 복사합니다." },
-                  { step: "02", text: "공식 사이트 바로가기 버튼을 클릭하여 해당 예약 플랫폼으로 이동합니다." },
-                  { step: "03", text: "할인이 적용 가능한 객실, 항공권 또는 투어 상품을 선택하고 예약을 진행합니다." },
-                  { step: "04", text: "결제 페이지의 '할인 코드/프로모션 코드 입력란'에 복사한 코드를 입력합니다." },
-                  { step: "05", text: "할인 혜택이 적용된 금액을 확인한 뒤 최종 결제를 마칩니다." }
-                ].map((item, idx) => (
+                {(deal.code
+                  ? [
+                      { step: "01", text: "코드 복사 버튼을 눌러 할인코드를 복사합니다." },
+                      { step: "02", text: "공식 사이트 바로가기 버튼을 클릭하여 해당 예약 플랫폼으로 이동합니다." },
+                      { step: "03", text: "할인이 적용 가능한 객실, 항공권 또는 투어 상품을 선택하고 예약을 진행합니다." },
+                      { step: "04", text: "결제 페이지의 '할인 코드/프로모션 코드 입력란'에 복사한 코드를 입력합니다." },
+                      { step: "05", text: "할인 혜택이 적용된 금액을 확인한 뒤 최종 결제를 마칩니다." }
+                    ]
+                  : [
+                      { step: "01", text: "아래 바로가기 버튼을 눌러 할인 페이지로 이동합니다. 이 링크를 통해 접속해야 할인가가 반영됩니다." },
+                      { step: "02", text: "날짜와 인원 등 원하는 조건으로 검색해 상품을 살펴봅니다." },
+                      { step: "03", text: "표시된 요금이 할인가인지 확인한 뒤 예약을 진행합니다." },
+                      { step: "04", text: "결제 화면에서도 할인가가 그대로 유지되는지 확인하고 최종 결제를 마칩니다." }
+                    ]
+                ).map((item, idx) => (
                   <div key={idx} className="relative">
                     <span className="absolute -left-[35px] top-0.5 flex items-center justify-center w-6 h-6 rounded-full bg-brand-secondary/15 text-brand-secondary text-xs font-extrabold border border-brand-secondary/35">
                       {item.step}
@@ -309,21 +403,23 @@ export default async function DealDetailPage({ params }: PageProps) {
 
           {/* Right Column: Terms & Conditions & Warning */}
           <div className="space-y-6">
-            <div className="glass rounded-3xl p-6 border border-slate-200/20 dark:border-slate-800/20">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                <span>쿠폰 이용 조건 📋</span>
-              </h2>
+            {deal.terms.length > 0 && (
+              <div className="glass rounded-3xl p-6 border border-slate-200/20 dark:border-slate-800/20">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                  <span>쿠폰 이용 조건 📋</span>
+                </h2>
 
-              <ul className="space-y-3">
-                {deal.terms.map((term, index) => (
-                  <li key={index} className="flex gap-2 text-sm text-slate-600 dark:text-slate-400">
-                    <span className="text-emerald-500 font-bold">•</span>
-                    <span>{term}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                <ul className="space-y-3">
+                  {deal.terms.map((term, index) => (
+                    <li key={index} className="flex gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <span className="text-emerald-500 font-bold">•</span>
+                      <span>{term}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {brandGuide && (
               <Link
@@ -364,7 +460,9 @@ export default async function DealDetailPage({ params }: PageProps) {
                 <Sparkles className="w-5 h-5" />
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white">
-                다른 추천 할인 정보 🔥
+                {expired
+                  ? "지금 사용할 수 있는 할인 ✅"
+                  : "다른 추천 할인 정보 🔥"}
               </h2>
             </div>
 

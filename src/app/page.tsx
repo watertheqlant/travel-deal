@@ -3,41 +3,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DealCard from "@/components/DealCard";
 import GomgomBanner from "@/components/GomgomBanner";
-import {
-  mockDeals,
-  isPriorityBrand,
-  sortByBrandPriority,
-} from "@/data/deals";
+import { getActiveDeals, isPriorityBrand, sortByBrandPriority } from "@/data/deals";
 import { SITE_URL } from "@/lib/site";
 import { Sparkles, TicketPercent } from "lucide-react";
 
-// Priority brands are promoted into the featured section even when their own
-// `featured` flag is false, then sorted to the front of it.
-const featuredDeals = sortByBrandPriority(
-  mockDeals.filter((deal) => deal.featured || isPriorityBrand(deal.brand)),
-);
-const regularDeals = mockDeals.filter(
-  (deal) => !deal.featured && !isPriorityBrand(deal.brand),
-);
-
-// ItemList of all live deals — helps search engines understand the homepage
-// as a curated collection and can surface a richer sitelinks presentation.
-// Ordered to match what the page actually renders, so the structured data does
-// not contradict the visible sequence.
-const orderedDeals = [...featuredDeals, ...regularDeals];
-
-const itemListJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: "곰곰쿠폰 실시간 여행 할인 쿠폰 목록",
-  numberOfItems: orderedDeals.length,
-  itemListElement: orderedDeals.map((deal, index) => ({
-    "@type": "ListItem",
-    position: index + 1,
-    name: `${deal.brand} ${deal.title}`,
-    url: `${SITE_URL}/deals/${deal.id}`,
-  })),
-};
+// This page is prerendered, so without a revalidate window "today" would be
+// frozen at build time and expired coupons would keep showing until the next
+// deploy. Hourly regeneration bounds how stale the expiry check can get.
+export const revalidate = 3600;
 
 // General homepage FAQ — targets common informational queries about how
 // travel coupon codes work, and is eligible for FAQ rich results.
@@ -81,6 +54,36 @@ const homeFaqJsonLd = {
 };
 
 export default function Home() {
+  // Computed per render, not at module scope — the module can outlive a
+  // revalidation, which would pin the expiry check to the process start.
+  const activeDeals = getActiveDeals();
+
+  // Priority brands are promoted into the featured section even when their own
+  // `featured` flag is false, then sorted to the front of it.
+  const featuredDeals = sortByBrandPriority(
+    activeDeals.filter((deal) => deal.featured || isPriorityBrand(deal.brand)),
+  );
+  const regularDeals = activeDeals.filter(
+    (deal) => !deal.featured && !isPriorityBrand(deal.brand),
+  );
+
+  // Ordered to match what the page actually renders, so the structured data
+  // does not contradict the visible sequence or advertise expired coupons.
+  const orderedDeals = [...featuredDeals, ...regularDeals];
+
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "곰곰쿠폰 실시간 여행 할인 쿠폰 목록",
+    numberOfItems: orderedDeals.length,
+    itemListElement: orderedDeals.map((deal, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: `${deal.brand} ${deal.title}`,
+      url: `${SITE_URL}/deals/${deal.id}`,
+    })),
+  };
+
   return (
     <>
       <script
