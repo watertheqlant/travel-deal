@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Bookmark, Menu, X } from "lucide-react";
+import { Compass, Bookmark, BookOpen, Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -64,6 +64,17 @@ export default function Navbar() {
               홈
             </Link>
             <Link
+              href="/guides"
+              className={`flex items-center gap-2 text-sm font-semibold transition-colors duration-200 px-3 py-2 rounded-lg ${
+                pathname.startsWith("/guides")
+                  ? "text-brand-primary bg-brand-primary/5"
+                  : "text-slate-600 dark:text-slate-300 hover:text-brand-primary hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>예약 가이드</span>
+            </Link>
+            <Link
               href="/bookmarks"
               className={`flex items-center gap-2 text-sm font-semibold transition-colors duration-200 px-3 py-2 rounded-lg ${
                 pathname === "/bookmarks"
@@ -117,6 +128,18 @@ export default function Navbar() {
               }`}
             >
               홈
+            </Link>
+            <Link
+              href="/guides"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`flex items-center gap-2 text-base font-semibold py-2 px-3 rounded-lg ${
+                pathname.startsWith("/guides")
+                  ? "text-brand-primary bg-brand-primary/5"
+                  : "text-slate-600 dark:text-slate-300"
+              }`}
+            >
+              <BookOpen className="w-5 h-5" />
+              예약 가이드
             </Link>
             <Link
               href="/bookmarks"

@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Compass, Mail, Shield, FileText } from "lucide-react";
+import { brandGuides } from "@/data/guides";
 
 export default function Footer() {
   return (
@@ -24,6 +25,19 @@ export default function Footer() {
 
           {/* Contact & Policy Links */}
           <div className="flex flex-col gap-2">
+            <h4 className="text-white text-sm font-semibold mb-2">예약 가이드</h4>
+            <div className="flex flex-col gap-2 text-sm text-slate-500 mb-4">
+              {brandGuides.map((guide) => (
+                <Link
+                  key={guide.slug}
+                  href={`/guides/${guide.slug}`}
+                  className="hover:text-white transition-colors"
+                >
+                  {guide.brand} 예약 가이드
+                </Link>
+              ))}
+            </div>
+
             <h4 className="text-white text-sm font-semibold mb-2">고객 센터 및 약관</h4>
             <div className="flex flex-col gap-2 text-sm text-slate-500">
               <a href="mailto:support@traveldeal.mock" className="flex items-center gap-1.5 hover:text-white transition-colors">

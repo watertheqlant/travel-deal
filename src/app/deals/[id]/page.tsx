@@ -7,9 +7,12 @@ import DealCard from "@/components/DealCard";
 import CopyCodeButton from "@/components/CopyCodeButton";
 import BookmarkButton from "@/components/BookmarkButton";
 import { mockDeals } from "@/data/deals";
+import { getGuideByBrand } from "@/data/guides";
 import { SITE_URL, SITE_NAME, SITE_OG_IMAGE } from "@/lib/site";
 import {
   ArrowLeft,
+  ArrowRight,
+  BookOpen,
   ExternalLink,
   Calendar,
   Info,
@@ -143,6 +146,11 @@ export default async function DealDetailPage({ params }: PageProps) {
 
   // Filter other active deals
   const relatedDeals = mockDeals.filter((d) => d.id !== deal.id).slice(0, 3);
+
+  // The informational counterpart of this page, when one exists. Linking to it
+  // completes the deal <-> guide pair: this page owns the transactional query
+  // ("{brand} 할인코드"), the guide owns the how-to queries.
+  const brandGuide = getGuideByBrand(deal.brand);
 
   return (
     <>
@@ -316,6 +324,25 @@ export default async function DealDetailPage({ params }: PageProps) {
                 ))}
               </ul>
             </div>
+
+            {brandGuide && (
+              <Link
+                href={`/guides/${brandGuide.slug}`}
+                className="block bg-brand-secondary/5 border border-brand-secondary/20 rounded-3xl p-6 space-y-2 hover:border-brand-secondary/50 transition-colors group"
+              >
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-brand-secondary" />
+                  <span>{deal.brand} 예약 가이드</span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {brandGuide.subtitle}. 결제 전에 확인할 점을 정리했습니다.
+                </p>
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-secondary pt-1">
+                  <span>가이드 읽어보기</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </Link>
+            )}
 
             <div className="bg-amber-500/5 border border-amber-500/20 rounded-3xl p-6 space-y-3">
               <h3 className="text-sm font-bold text-amber-600 dark:text-amber-500 flex items-center gap-2">
